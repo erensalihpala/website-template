@@ -1,16 +1,17 @@
-package com.crm-project.controller;
+package com.crm_project.controller;
 
-import com.crm-project.model.AuthRequest;
-import com.crm-project.model.AuthResponse;
-import com.crm-project.model.User;
-import com.crm-project.service.UserService;
-import com.crm-project.util.JwtUtil;
+import com.crm_project.model.AuthRequest;
+import com.crm_project.model.AuthResponse;
+import com.crm_project.model.User;
+import com.crm_project.service.UserService;
+import com.crm_project.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 /**
  * AuthController
@@ -39,7 +40,7 @@ public class AuthController {
      * @return Kaydedilen kullanıcı veya hata mesajı
      */
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
         try {
             return ResponseEntity.ok(userService.registerUser(user));
         } catch (Exception e) {

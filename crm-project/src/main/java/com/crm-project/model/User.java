@@ -1,7 +1,14 @@
 package com.yourprojectname.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
+/**
+ * Kullanıcı modeli
+ * 
+ * Bu sınıf, kullanıcı bilgilerini temsil eder ve veritabanı tablosu ile eşleştirilir.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -10,9 +17,13 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "Kullanıcı adı boş olamaz")
+    @Size(min = 3, message = "Kullanıcı adı en az 3 karakter olmalıdır")
     private String username;
 
     @Column(nullable = false)
+    @NotBlank(message = "Şifre boş olamaz")
+    @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
     private String password;
 
     @Column(nullable = false)
