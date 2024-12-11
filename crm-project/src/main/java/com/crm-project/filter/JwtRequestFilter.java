@@ -1,7 +1,7 @@
-package com.crm-project.filter;
+package com.crm_project.filter;
 
-import com.crm-project.service.UserService;
-import com.crm-project.util.JwtUtil;
+import com.crm_project.service.UserService;
+import com.crm_project.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +33,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
         String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;

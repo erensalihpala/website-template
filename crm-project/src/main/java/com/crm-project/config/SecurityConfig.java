@@ -1,80 +1,54 @@
-package com.crm-project.config;
+package com.crm_project.config;
 
+import com.crm_project.filter.JwtRequestFilter;
+import com.crm_project.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * SecurityConfig
  * 
- * Uygulamanın güvenlik yapılandırmasını sağlar.
- * - Yetkilendirme ve kimlik doğrulama mekanizmalarını yönetir.
- * - BCrypt ile şifreleme.
- * - API erişim kurallarını belirler.
+ * Spring Security yapılandırmasını sağlar ve JWT doğrulama filtresini ekler.
  */
 @Configuration
 public class SecurityConfig {
 
-    /**
-     * BCryptPasswordEncoder
-     * 
-     * Kullanıcı şifrelerini güvenli bir şekilde şifrelemek için BCrypt algoritması kullanılır.
-     * 
-     * @return BCryptPasswordEncoder
-     */
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * SecurityFilterChain
-     * 
-     * HTTP güvenlik kurallarını yapılandırır.
-     * - Yetkisiz kullanıcıların erişim kurallarını tanımlar.
-     * 
-     * @param http HttpSecurity yapılandırması
-     * @return SecurityFilterChain
-     * @throws Exception
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-            .antMatchers("/api/auth/**").permitAll() // Auth endpoint'lerine izin ver
-            .anyRequest().authenticated(); // Diğer tüm endpoint'ler için yetki gerektir
+            .antMatchers("/api/auth/**").permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
-
-    /**
-     * AuthenticationManager Bean
-     * 
-     * Kimlik doğrulama için AuthenticationManager sağlar.
-     * 
-     * @param auth AuthenticationManagerBuilder
-     * @return AuthenticationManager
-     * @throws Exception
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationManagerBuilder auth) throws Exception {
-        return auth.build();
-    }
-}
-
-@Autowired
-private JwtRequestFilter jwtRequestFilter;
-
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf().disable()
-        .authorizeRequests()
-        .antMatchers("/api/auth/**").permitAll() // Yetkilendirme gerektirmeyen endpoint'ler
-        .anyRequest().authenticated() // Diğer tüm endpoint'ler korumalı
-        .and()
-        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // JWT filtresi ekleniyor
-    return http.build();
 }

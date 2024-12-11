@@ -1,74 +1,79 @@
-package com.crm-project.util;
+package com.crm_project.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * JwtUtil
  * 
- * JWT oluşturma ve doğrulama işlemlerini yönetir.
+ * JWT token'larının oluşturulması ve doğrulanmasını sağlar.
  */
-@Component
+@Service
 public class JwtUtil {
 
-    private final String SECRET_KEY = "your_secret_key"; // Güvenli bir key seçin
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    /**
-     * JWT Token oluşturur.
-     * 
-     * @param username Kullanıcı adı
-     * @return JWT token
-     */
+    @Value("${jwt.expiration}")
+    private long jwtExpirationInMs;
+
+    // Token'dan kullanıcı adını çıkarır
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    // Token'dan belirli bir claim'i çıkarır
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    // Tüm claim'leri çıkarır
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // Token'ın süresinin dolup dolmadığını kontrol eder
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // Token'ın son kullanma tarihini çıkarır
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    // Kullanıcı adı için token oluşturur
     public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username);
+    }
+
+    // Token oluşturur
+    private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 saat geçerli
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    /**
-     * JWT Token içerisindeki kullanıcı adını döndürür.
-     * 
-     * @param token JWT token
-     * @return Kullanıcı adı
-     */
-    public String extractUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    /**
-     * JWT Token geçerliliğini kontrol eder.
-     * 
-     * @param token JWT token
-     * @param username Kullanıcı adı
-     * @return Token geçerli mi
-     */
-    public boolean validateToken(String token, String username) {
-        String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
-    }
-
-    /**
-     * Token süresinin dolup dolmadığını kontrol eder.
-     * 
-     * @param token JWT token
-     * @return Süresi dolmuş mu
-     */
-    private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+    // Token'ı doğrular
+    public Boolean validateToken(String token, String username) {
+        final String extractedUsername = extractUsername(token);
+        return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 }
