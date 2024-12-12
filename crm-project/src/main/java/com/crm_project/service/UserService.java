@@ -6,10 +6,10 @@
  * Kullanıcı Bulma: Kullanıcı giriş işlemlerinde veya yetkilendirme aşamasında kullanıcı bilgilerini getirir.
  */
 
-package com.crm-project.service;
+package com.crm_project.service;
 
-import com.crm-project.model.User;
-import com.crm-project.repository.UserRepository;
+import com.crm_project.model.User;
+import com.crm_project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

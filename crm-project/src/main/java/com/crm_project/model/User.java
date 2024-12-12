@@ -1,4 +1,4 @@
-package com.yourprojectname.model;
+package com.crm_project.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package com.crm-project.model;
+package com.crm_project.model;
 
 /**
  * AuthResponse

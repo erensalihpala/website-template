@@ -4,9 +4,9 @@
 * Kullanıcı Adı ile Arama: findByUsername metodu, bir kullanıcıyı kullanıcı adı üzerinden sorgulamak için tanımlanmıştır. Bu, giriş işlemlerinde ve kayıt doğrulamalarında kullanılacak
  */
 
-package com.crm-project.repository;
+package com.crm_project.repository;
 
-import com.crm-project.model.User;
+import com.crm_project.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
