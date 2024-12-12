@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user_entities") // Benzersiz tablo adı
 @Getter
 @Setter
 public class UserEntity {
