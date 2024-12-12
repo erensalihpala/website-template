@@ -19,7 +19,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public JwtRequestFilter(@Lazy UserService userService, JwtUtil jwtUtil) { // Döngüyü kırmak için @Lazy ekleniyor
+    public JwtRequestFilter(@Lazy UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
@@ -27,6 +27,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+
+        // Actuator ve health endpoint'lerini bypass et
+        if (requestURI.startsWith("/health") || requestURI.startsWith("/actuator")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
@@ -39,12 +47,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (username != null && jwtUtil.validateToken(jwt, username)) {
             UserDetails userDetails = userService.loadUserByUsername(username);
-            // Authentication işlemleri...
-        }
-
-        if (request.getRequestURI().equals("/health") || request.getRequestURI().equals("/error")) {
-            chain.doFilter(request, response);
-            return;
+            // Authentication işlemleri yapılabilir
         }
 
         chain.doFilter(request, response);

@@ -17,7 +17,7 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) { // Döngüyü kırmak için @Lazy ekleniyor
+    public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
@@ -25,8 +25,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/actuator/health", "/actuator/**", "/api/auth/**", "/error").permitAll() // Allow anonymous access to these endpoints
+                .anyRequest().authenticated() // All other requests need to be authenticated
             )
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

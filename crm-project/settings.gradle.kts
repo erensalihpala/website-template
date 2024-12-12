@@ -1,1 +1,1 @@
-rootProject.name = "crm-project"
+rootProject.name = "crm_project"
