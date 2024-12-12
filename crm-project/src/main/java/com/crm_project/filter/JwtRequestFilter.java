@@ -42,6 +42,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             // Authentication işlemleri...
         }
 
+        if (request.getRequestURI().equals("/health") || request.getRequestURI().equals("/error")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         chain.doFilter(request, response);
     }
 }
