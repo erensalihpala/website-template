@@ -2,7 +2,7 @@ package com.crm_project.controller;
 
 import com.crm_project.model.AuthRequest;
 import com.crm_project.model.AuthResponse;
-import com.crm_project.model.User;
+import com.crm_project.model.UserDTO;
 import com.crm_project.service.UserService;
 import com.crm_project.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
-/**
- * AuthController
- * 
- * Kullanıcı kayıt ve giriş işlemlerini yönetir.
- * - Kayıt API'si: Yeni kullanıcıların kayıt edilmesini sağlar.
- * - Giriş API'si: Kullanıcıların doğrulanmasını ve token oluşturulmasını sağlar.
- */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -33,35 +26,21 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    /**
-     * Yeni bir kullanıcı kaydı API'si
-     * 
-     * @param user Kaydedilecek kullanıcı verileri (JSON formatında)
-     * @return Kaydedilen kullanıcı veya hata mesajı
-     */
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
         try {
-            return ResponseEntity.ok(userService.registerUser(user));
+            return ResponseEntity.ok(userService.registerUser(userDTO));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
-    /**
-     * Kullanıcı giriş API'si
-     * 
-     * @param authRequest Kullanıcı adı ve şifre bilgileri (JSON formatında)
-     * @return Başarılı giriş durumunda JWT token
-     */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) {
         try {
-            // Kullanıcı doğrulaması
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
-            // Kullanıcı doğrulandı, token oluştur
             final String jwt = jwtUtil.generateToken(authRequest.getUsername());
             return ResponseEntity.ok(new AuthResponse(jwt));
         } catch (Exception e) {
